@@ -30,15 +30,15 @@ public class GenericsExample {
         printList(listIn);
     }
 
-    // <T, V> tell java it is a generic type
+    // add generic types <T, V> to method, it tells java it is a generic type
     private static <T, V> T shout(T thingtoShout, V otherThingToShout) {
         System.out.println(thingtoShout + "!!!" + otherThingToShout);
         return thingtoShout;
     }
 
-    // List<?> is a parent of List<Integer/String>
-    // List<Object> is not
+    // List<?> is a parent of List<Integer/String>, List<Object> is not
     // <? super Integer>, Integer, Number, Object
+    // <? extends Number>, Integer, Number
     private static void printList(List<? super Integer> myList) {
         Iterator iterator = myList.iterator();
         while (iterator.hasNext()) {

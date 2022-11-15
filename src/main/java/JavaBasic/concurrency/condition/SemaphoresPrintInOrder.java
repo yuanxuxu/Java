@@ -5,21 +5,18 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.Semaphore;
 
-public class PrintInOrderReentrantLock {
-
-    final private static Lock lock = new ReentrantLock();
-    final private static Condition conditionMet = lock.newCondition();
-    final private static Condition conditionMet2 = lock.newCondition();
-    private static boolean firstDone = false;
-    private static boolean secondDone = false;
+public class SemaphoresPrintInOrder {
+    static Semaphore[] semaphores; // permits, only thread acquired permit can run
 
     public static void main(String[] args) {
         long nano_startTime = System.nanoTime();
         ExecutorService executor = Executors.newFixedThreadPool(8);
+
+        semaphores = new Semaphore[2];
+        semaphores[0] = new Semaphore(0);
+        semaphores[1] = new Semaphore(0);
 
         Runnable A = () -> {
             System.out.printf("a, ");
@@ -69,39 +66,20 @@ public class PrintInOrderReentrantLock {
     }
 
     public static void first(Runnable A) throws InterruptedException {
-        lock.lock();
-        try {
-            A.run();
-            firstDone = true;
-            conditionMet.signal();
-        } finally {
-            lock.unlock();
-        }
+        A.run();
+        semaphores[0].release();
     }
 
     public static void second(Runnable B) throws InterruptedException {
-        lock.lock();
-        try {
-            while (!firstDone)
-                conditionMet.await();
-            B.run();
-            secondDone = true;
-            conditionMet2.signal();
-        } finally {
-            lock.unlock();
-        }
+        semaphores[0].acquire();
+        B.run();
+        semaphores[0].release();
+        semaphores[1].release();
     }
 
     public static void third(Runnable C) throws InterruptedException {
-        lock.lock();
-        try {
-            while (!secondDone)
-                conditionMet2.await();
-            C.run();
-            secondDone = true;
-            conditionMet2.signal();
-        } finally {
-            lock.unlock();
-        }
+        semaphores[1].acquire();
+        C.run();
+        semaphores[1].release();
     }
 }

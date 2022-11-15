@@ -1,5 +1,8 @@
 package javabasic.effectivejava.generic;
 
+/**
+ * Add generic type to class <T>
+ */
 public class Printer<T> {
     T thingToPrint;
 

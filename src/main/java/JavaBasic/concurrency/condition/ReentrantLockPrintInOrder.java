@@ -5,18 +5,21 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
-public class PrintInOrderSemaphores {
-    static Semaphore[] semaphores; // permits, only thread acquired permit can run
+public class ReentrantLockPrintInOrder {
+
+    final private static Lock lock = new ReentrantLock();
+    final private static Condition conditionMet = lock.newCondition();
+    final private static Condition conditionMet2 = lock.newCondition();
+    private static boolean firstDone = false;
+    private static boolean secondDone = false;
 
     public static void main(String[] args) {
         long nano_startTime = System.nanoTime();
         ExecutorService executor = Executors.newFixedThreadPool(8);
-
-        semaphores = new Semaphore[2];
-        semaphores[0] = new Semaphore(0);
-        semaphores[1] = new Semaphore(0);
 
         Runnable A = () -> {
             System.out.printf("a, ");
@@ -66,20 +69,39 @@ public class PrintInOrderSemaphores {
     }
 
     public static void first(Runnable A) throws InterruptedException {
-        A.run();
-        semaphores[0].release();
+        lock.lock();
+        try {
+            A.run();
+            firstDone = true;
+            conditionMet.signal();
+        } finally {
+            lock.unlock();
+        }
     }
 
     public static void second(Runnable B) throws InterruptedException {
-        semaphores[0].acquire();
-        B.run();
-        semaphores[0].release();
-        semaphores[1].release();
+        lock.lock();
+        try {
+            while (!firstDone)
+                conditionMet.await();
+            B.run();
+            secondDone = true;
+            conditionMet2.signal();
+        } finally {
+            lock.unlock();
+        }
     }
 
     public static void third(Runnable C) throws InterruptedException {
-        semaphores[1].acquire();
-        C.run();
-        semaphores[1].release();
+        lock.lock();
+        try {
+            while (!secondDone)
+                conditionMet2.await();
+            C.run();
+            secondDone = true;
+            conditionMet2.signal();
+        } finally {
+            lock.unlock();
+        }
     }
 }
