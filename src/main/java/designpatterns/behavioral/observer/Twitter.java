@@ -5,7 +5,7 @@ import java.util.List;
 
 public class Twitter {
 
-    private static final Follower userA = text -> System.out.println(String.format("UserA follower received %s", text));
+    public static final Follower userA = text -> System.out.println(String.format("UserA follower received %s", text));
 
     public static void main(String[] args) {
         Followee followee = new Followee();
@@ -16,7 +16,8 @@ public class Twitter {
         followee.add(new Follower() { // annoymouse class
             @Override
             public void receive(String text) {
-                System.out.println(String.format("Annoymous follower received %s", text));
+                String format = "Annoymous follower received %s";
+                System.out.println(String.format(format, text));
             }
         });
 
