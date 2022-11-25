@@ -16,8 +16,7 @@ public class Twitter {
         followee.add(new Follower() { // annoymouse class
             @Override
             public void receive(String text) {
-                String format = "Annoymous follower received %s";
-                System.out.println(String.format(format, text));
+                System.out.println(String.format("Annoymous follower received %s", text));
             }
         });
 
