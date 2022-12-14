@@ -3,7 +3,11 @@ package javabasic.java8;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
+/**
+ * Arrays.stream(), Lists.stream() > IntStream.of(nums)
+ */
 public class Java8 {
     public static void main(String[] args) {
         int[] numbers = { 4, 1, 12 };
@@ -15,11 +19,18 @@ public class Java8 {
 
         IntStream.of(numbers).min().ifPresent(System.out::println);
 
+        IntStream.of(numbers).forEach(System.out::print);
+        Arrays.stream(numbers).forEach(System.out::print);
+        // Stream.of(numbers).forEach(System.out::println); failed
+
         IntStream.of(numbers) // create stream
                 .distinct() // process stream
                 .sorted()
                 .limit(2)
                 .forEach(System.out::println); // consume stream
+
+        // Integer Stream
+        IntStream.range(0, 9).forEach(System.out::println);
 
         Employee A = new Employee(2, "Amy");
         Employee B = new Employee(3, "Tom");
